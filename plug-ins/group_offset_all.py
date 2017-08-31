@@ -17,15 +17,32 @@ def debugMessage(Message):
 
 def py_group_offset_all(img, tdraw, xoffset, yoffset, edge, half):
 
+        def dogroup(group):
+              ll = group.layers
+              for l in ll:
+                 
+                 if (type(l) == gimp.GroupLayer):
+                   dogroup(l)
+                 else:
+                   if (edge == "wrap"):
+                     pdb.gimp_drawable_offset(l, True, 0, xoffset, yoffset)
+                   if (edge == "bg"):
+                     pdb.gimp_drawable_offset(l, False, 0, xoffset, yoffset)
+                   if (edge == "trans"):
+                     pdb.gimp_drawable_offset(l, False, 1, xoffset, yoffset)
+
         def doAction():
               ll = img.layers
               for l in ll:
-                 if (edge == "wrap"):
-                   pdb.gimp_drawable_offset(l, True, 0, xoffset, yoffset)
-                 if (edge == "bg"):
-                   pdb.gimp_drawable_offset(l, False, 0, xoffset, yoffset)
-                 if (edge == "trans"):
-                   pdb.gimp_drawable_offset(l, False, 1, xoffset, yoffset)
+                 if (type(l) == gimp.GroupLayer):
+                   dogroup(l)
+                 else:
+                   if (edge == "wrap"):
+                     pdb.gimp_drawable_offset(l, True, 0, xoffset, yoffset)
+                   if (edge == "bg"):
+                     pdb.gimp_drawable_offset(l, False, 0, xoffset, yoffset)
+                   if (edge == "trans"):
+                     pdb.gimp_drawable_offset(l, False, 1, xoffset, yoffset)
 
         ### if half is set, set offsets to 1/2 image size
         if half:
@@ -35,6 +52,7 @@ def py_group_offset_all(img, tdraw, xoffset, yoffset, edge, half):
         pdb.gimp_image_undo_group_start(img)
         doAction()
         pdb.gimp_image_undo_group_end(img)
+        debugMessage("Operation completed")
 
 register(
         "py_group_offset_all",
